@@ -1,21 +1,25 @@
 module master_fsm #(
+    // szerokosc magistrali dla rejestrow pozycji
     parameter POS_RANGE = 16
 )(
     input logic clk,
     input logic rst_n,
 
+    // wejscia sterujace
+    input logic enable,                 
+    input logic callib,                 
+    input logic go_to,         
+
+    //wejscia z czujnikow i licznikow
+    input logic sensor_clean,
+    input logic [POS_RANGE - 1:0] target_position,
+    input logic [POS_RANGE - 1:0] current_position
+
+    // wyjscia sterujace
     output logic set_zero,              
     output logic dir,                   
     output logic callib_done,           
-    output logic prescaler_enable,      
-
-    input logic enable,                 
-    input logic callib,                 
-    input logic go_to,                  
-    input logic sensor_clean,
-
-    input logic [POS_RANGE - 1:0] target_position,
-    input logic [POS_RANGE - 1:0] current_position
+    output logic prescaler_enable,     
 );
 
     typedef enum logic [2:0] {
@@ -62,6 +66,8 @@ module master_fsm #(
                 end
                 
                 CALLIB_DONE: begin
+                    // FSM czeka aż zostanie zdjety sygnal callib
+                    // potwierdzajac odczytanie flagi
                     if (!callib) begin
                         state_nxt = IDLE;
                     end
