@@ -9,11 +9,12 @@ module debouncer #(
     output logic cleared_signal
 );
 
-    logic [19:0] debounce_cnt; // delay counter
+    logic [19:0] debounce_cnt, debounce_cnt_nxt; // delay counter
+    logic cleared_signal_nxt;
     logic sync_0, sync_1;      // Synchronizatory (zabezpieczenie przed matastabilnością)
 
     // Synchronizacja sygnału 
-    always_ff @(posedge clk) begin
+    always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sync_0 <= 1'b0;
             sync_1 <= 1'b0;
@@ -23,25 +24,29 @@ module debouncer #(
         end
     end
 
-    // Właściwa logika filtrowania drgań
-    always_ff @(posedge clk) begin
+    always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             debounce_cnt   <= '0;
             cleared_signal <= 1'b0;
         end else begin
-            if (sync_1 != cleared_signal) begin
-                // Sygnał się zmienił - zaczynamy odliczanie
-                if (debounce_cnt >= DELAY_CYCLES - 1) begin
-                    // Sygnał ustabilizowany wystarczająco długo - przyjmujemy nową wartość
-                    cleared_signal <= sync_1;
-                    debounce_cnt   <= '0;
-                end else begin
-                    debounce_cnt <= debounce_cnt + 1;
-                end
+            debounce_cnt   <= debounce_cnt_nxt;
+            cleared_signal <= cleared_signal_nxt;
+        end
+    end
+
+    always_comb begin
+        debounce_cnt_nxt   = debounce_cnt;
+        cleared_signal_nxt = cleared_signal;
+
+        if (sync_1 != cleared_signal) begin
+            if (debounce_cnt >= DELAY_CYCLES - 1) begin
+                cleared_signal_nxt = sync_1;
+                debounce_cnt_nxt   = '0;
             end else begin
-                // Sygnał bez zmian - zerujemy licznik
-                debounce_cnt <= '0;
+                debounce_cnt_nxt = debounce_cnt + 1;
             end
+        end else begin
+            debounce_cnt_nxt = '0;
         end
     end
 

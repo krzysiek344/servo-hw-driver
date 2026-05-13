@@ -1,32 +1,41 @@
 
 `timescale 1ns/1ps
 
-module prescaler (
+module prescaler #(
+    parameter int SCALE_WIDTH = 32
+)(
     input logic clk,
     input logic rst_n,
     input logic enable,
-    input logi [31:0] scale_val,
+    input logic [SCALE_WIDTH-1:0] scale_val,
     output logic step_tick
 );
-    logic [31:0] counter;
+    logic [SCALE_WIDTH-1:0] counter, counter_nxt;
+    logic step_tick_nxt;
 
-    always_ff @(posedge clk) begin
+    always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            counter   <= '0;
+            counter <= '0;
             step_tick <= 1'b0;
         end else begin
-            step_tick <= 1'b0; // Domyślnie impuls jest zgaszony
+            counter <= counter_nxt;
+            step_tick <= step_tick_nxt;
+        end
+    end
 
-            if (enable) begin
-                if (counter >= scale_val - 1) begin
-                    counter   <= '0;
-                    step_tick <= 1'b1; // Strzał (impuls) na jeden cykl zegara
-                end else begin
-                    counter <= counter + 1;
-                end
+    always_comb begin
+        counter_nxt = counter;
+        step_tick_nxt = 1'b0;
+
+        if (enable) begin
+            if (counter >= scale_val - 1) begin
+                counter_nxt = '0;
+                step_tick_nxt = 1'b1;
             end else begin
-                counter <= '0; // Zerowanie, gdy silnik stoi
+                counter_nxt = counter + 1;
             end
+        end else begin
+            counter_nxt = '0;
         end
     end
 endmodule
