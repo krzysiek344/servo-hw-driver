@@ -12,9 +12,9 @@ module sequencer (
     logic [1:0] phase_state; // Licznik stanów 0-3
     logic [3:0] active_coil; // Która cewka jest aktualnie zasilana
 
-    always_ff @(posedge clk) begin
+    always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            phase_state <= '0;
+            phase_state <= 2'b0;
         end else if (step_tick) begin
             // Zmiana fazy w zależności od kierunku
             if (dir)
