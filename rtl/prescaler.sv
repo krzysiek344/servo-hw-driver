@@ -8,7 +8,6 @@ module prescaler #(
     input logic rst_n,
     input logic enable,
     input logic [SCALE_WIDTH-1:0] scale_val,
-    output logic step_tick
 );
     logic [SCALE_WIDTH-1:0] counter, counter_nxt;
     logic step_tick_nxt;
