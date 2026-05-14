@@ -37,3 +37,15 @@ Główna maszyna stanów (Finite State Machine) odpowiedzialna za zarządzanie t
 2. **Kierunek w trybie kalibracji:** Podczas szukania czujnika krańcowego w stanie `CALLIB_FIND`, kierunek ruchu (`dir`) jest sztywno wymuszany na wartość `0`.
 3. **Przerwanie normalnego ruchu:** Układ pozwala na bezwarunkowe przerwanie trwającego przemieszczania (`MOVE_RUN`) w momencie pojawienia się sygnału kalibracji (`callib = 1`).
 4. **Protokół Handshake:** Stan po udanej kalibracji (`CALLIB_DONE`) jest stanem oczekującym. FSM nie przejdzie do stanu `IDLE`, dopóki układ nadrzędny (np. mikroprocesor) nie "zauważy" flagi `callib_done = 1` i nie obniży sygnału żądania `callib = 0`. Zapobiega to gubieniu flag i błędom synchronizacji przy krótkich impulsach.
+
+## Sequencer (`sequencer.sv`)
+TODO
+
+## Prescaler (`prescaler.sv`)
+TODO
+
+## Step Counter (`step_conter.sv`)
+TODO
+
+## Debouncer (`debouncer.sv`)
+TODO
