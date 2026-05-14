@@ -13,13 +13,13 @@ module master_fsm #(
     //wejscia z czujnikow i licznikow
     input logic sensor_clean,
     input logic [POS_RANGE - 1:0] target_position,
-    input logic [POS_RANGE - 1:0] current_position
+    input logic [POS_RANGE - 1:0] current_position,
 
     // wyjscia sterujace
     output logic set_zero,              
     output logic dir,                   
     output logic callib_done,           
-    output logic prescaler_enable,     
+    output logic prescaler_enable 
 );
 
     typedef enum logic [2:0] {

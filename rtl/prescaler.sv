@@ -5,7 +5,7 @@ module prescaler (
     input logic clk,
     input logic rst_n,
     input logic enable,
-    input logi [31:0] scale_val,
+    input logic [31:0] scale_val,
     output logic step_tick
 );
     logic [31:0] counter;
