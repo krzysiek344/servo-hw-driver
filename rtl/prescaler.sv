@@ -7,7 +7,7 @@ module prescaler #(
     input logic clk,
     input logic rst_n,
     input logic enable,
-    input logic [SCALE_WIDTH-1:0] scale_val,
+    input logic [SCALE_WIDTH-1:0] scale_val
 );
     logic [SCALE_WIDTH-1:0] counter, counter_nxt;
     logic step_tick_nxt;
