@@ -1,41 +1,54 @@
 `timescale 1ns / 1ps
 
-module sequencer (
+module sequencer #(
+    parameter COILS_NUM = 4
+)(
     input  logic clk,
     input  logic rst_n,
+    output logic [COILS_NUM-1:0] stepper_phases,
     input  logic step_tick,
     input  logic dir,
-    input  logic inversion,
-    output logic [3:0] stepper_phases
+    input  logic inversion
+  
 );
+    localparam PHASE_WIDTH = ($clog2(COILS_NUM) > 0) ? $clog2(COILS_NUM) : 1;
 
-    logic [1:0] phase_state; // Licznik stanów 0-3
-    logic [3:0] active_coil; // Która cewka jest aktualnie zasilana
+    logic [PHASE_WIDTH-1:0] phase_state, phase_state_nxt; // Licznik stanów 
+    logic [COILS_NUM-1:0] active_coil; // Która cewka jest aktualnie zasilana
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            phase_state <= 2'b0;
-        end else if (step_tick) begin
-            // Zmiana fazy w zależności od kierunku
-            if (dir)
-                phase_state <= phase_state + 1;
-            else
-                phase_state <= phase_state - 1;
+            phase_state <= '0;
+        end else begin
+           phase_state <= phase_state_nxt;
         end
     end
 
-    // Dekoder faz (sterowanie pełnokrokowe - Full Step)
     always_comb begin
-        case (phase_state)
-            2'b00: active_coil = 4'b0001;
-            2'b01: active_coil = 4'b0010;
-            2'b10: active_coil = 4'b0100;
-            2'b11: active_coil = 4'b1000;
-            default: active_coil = 4'b0000;
-        endcase
+        phase_state_nxt = phase_state;
+        if (step_tick) begin
+            if (dir) begin
+                if (phase_state >= (COILS_NUM - 1)) begin
+                    phase_state_nxt = '0;
+                end else begin
+                    phase_state_nxt = phase_state + 1;
+                end
+            end else begin
+                if (phase_state == '0) begin
+                    phase_state_nxt = COILS_NUM - 1;
+                end else begin
+                    phase_state_nxt = phase_state - 1;
+                end
+            end
+        end
     end
 
-    // Wyjście z opcją inwersji
+    always_comb begin
+        active_coil = '0;
+        active_coil[phase_state] = 1'b1;
+    end
+
+    /* Output assignment */
     assign stepper_phases = inversion ? ~active_coil : active_coil;
 
 endmodule

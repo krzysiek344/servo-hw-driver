@@ -1,14 +1,15 @@
 `timescale 1ns / 1ps
 
 module step_counter #(
-    parameter int POS_RANGE = 32
+    parameter POS_RANGE = 32
 )(
     input  logic clk,
     input  logic rst_n,
+    output logic [POS_RANGE-1:0] current_pos,
     input  logic step_tick,
     input  logic dir,
-    input  logic set_zero, // z poziomu FSM mozesz wyzerowac licznik przez ta zmienna 
-    output logic [POS_RANGE-1:0] current_pos
+    input  logic set_zero  // z poziomu FSM mozesz wyzerowac licznik przez ta zmienna 
+    
 );
 
     logic [POS_RANGE-1:0] current_pos_nxt;

@@ -1,14 +1,15 @@
 `timescale 1ns / 1ps
 
 module top_servo_drv #(
-    parameter int POS_RANGE     = 32, 
-    parameter int SCALE_WIDTH   = 32,
-    parameter int DELAY_CYCLES  = 1000000
+    parameter POS_RANGE     = 32, 
+    parameter SCALE_WIDTH   = 32,
+    parameter DELAY_CYCLES  = 1000000,
+    parameter COILS_NUM     = 4
 ) (
     input  logic clk,
     input  logic rst_n,
 
-    output logic [3:0] stepper_phases,
+    output logic [COILS_NUM-1:0] stepper_phases,
     output logic callib_done,
     output logic [POS_RANGE-1:0] current_pos,
 
@@ -44,7 +45,9 @@ module top_servo_drv #(
         .current_position (current_pos)
     );
 
-    prescaler u_prescaler (
+    prescaler #(
+        .SCALE_WIDTH(SCALE_WIDTH)
+    )u_prescaler(
         .clk       (clk),
         .rst_n     (rst_n),
         .step_tick (step_tick_w),
@@ -61,7 +64,9 @@ module top_servo_drv #(
         .signal_in      (sensor_raw)
     );
 
-    sequencer u_sequencer (
+    sequencer #(
+        .COILS_NUM(COILS_NUM)
+    )u_sequencer (
         .clk            (clk),
         .rst_n          (rst_n),
         .stepper_phases (stepper_phases),
@@ -70,7 +75,9 @@ module top_servo_drv #(
         .inversion      (inversion)
     );
 
-    step_counter u_step_counter (
+    step_counter #(
+        .POS_RANGE(POS_RANGE)
+    )u_step_counter (
         .clk         (clk),
         .rst_n       (rst_n),
         .current_pos (current_pos),
