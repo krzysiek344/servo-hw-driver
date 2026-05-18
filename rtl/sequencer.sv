@@ -9,33 +9,40 @@ module sequencer (
     output logic [3:0] stepper_phases
 );
 
-    logic [1:0] phase_state; // Licznik stanów 0-3
+    logic [1:0] phase_state, phase_state_nxt; // Licznik stanów 0-3
     logic [3:0] active_coil; // Która cewka jest aktualnie zasilana
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             phase_state <= 2'b0;
-        end else if (step_tick) begin
-            // Zmiana fazy w zależności od kierunku
-            if (dir)
-                phase_state <= phase_state + 1;
-            else
-                phase_state <= phase_state - 1;
+        end else begin
+           phase_state <= phase_state_nxt;
         end
     end
 
-    // Dekoder faz (sterowanie pełnokrokowe - Full Step)
     always_comb begin
+        phase_state_nxt = phase_state;
+        if (step_tick) begin
+            if (dir) begin
+                phase_state_nxt = phase_state + 2'd1;
+            end else begin
+                phase_state_nxt = phase_state - 2'd1;
+            end
+        end
+    end
+
+    always_comb begin
+        active_coil = 4'b0000;
         case (phase_state)
-            2'b00: active_coil = 4'b0001;
-            2'b01: active_coil = 4'b0010;
-            2'b10: active_coil = 4'b0100;
-            2'b11: active_coil = 4'b1000;
-            default: active_coil = 4'b0000;
+            2'b00: begin active_coil = 4'b0001; end
+            2'b01: begin active_coil = 4'b0010; end
+            2'b10: begin active_coil = 4'b0100; end
+            2'b11: begin active_coil = 4'b1000; end
+            default: begin active_coil = 4'b0000; end
         endcase
     end
 
-    // Wyjście z opcją inwersji
+    /* Output assignment */
     assign stepper_phases = inversion ? ~active_coil : active_coil;
 
 endmodule
