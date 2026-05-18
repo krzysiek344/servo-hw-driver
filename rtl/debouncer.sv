@@ -5,10 +5,11 @@ module debouncer #(
 ) (
     input  logic clk,
     input  logic rst_n,
-    input  logic signal_in,
-    output logic cleared_signal
+    output logic cleared_signal,
+    input  logic signal_in
+   
 );
-    localparam CNT_WIDTH = $clog2(DELAY_CYCLES);// 
+    localparam CNT_WIDTH = ($clog2(DELAY_CYCLES) >0) ? $clog2(DELAY_CYCLES) : 1;// 
 
     logic [CNT_WIDTH-1:0] debounce_cnt, debounce_cnt_nxt; // delay counter
     logic cleared_signal_nxt;
@@ -40,7 +41,7 @@ module debouncer #(
         cleared_signal_nxt = cleared_signal;
 
         if (sync_1 != cleared_signal) begin
-            if (debounce_cnt >= DELAY_CYCLES - 1) begin
+            if (debounce_cnt >= (DELAY_CYCLES - 1)) begin
                 cleared_signal_nxt = sync_1;
                 debounce_cnt_nxt   = '0;
             end else begin
