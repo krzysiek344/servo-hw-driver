@@ -8,8 +8,9 @@ module debouncer #(
     input  logic signal_in,
     output logic cleared_signal
 );
+    localparam CNT_WIDTH = $clog2(DELAY_CYCLES);// 
 
-    logic [19:0] debounce_cnt, debounce_cnt_nxt; // delay counter
+    logic [CNT_WIDTH-1:0] debounce_cnt, debounce_cnt_nxt; // delay counter
     logic cleared_signal_nxt;
     logic sync_0, sync_1;      // Synchronizatory (zabezpieczenie przed matastabilnością)
 
